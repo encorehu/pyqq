@@ -1,19 +1,27 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Author: maplebeats
 # gtalk/mail: maplebeats@gmail.com
 
-from urllib import parse,request
-from http import cookiejar
+#from urllib import parse,request
+#from http import cookiejar
 import random
 import json,hashlib
 import gzip
 import os
 from logger import logger
 
+import urllib
+import urllib2
+import cookielib
+import SimpleHTTPServer
+from SimpleHTTPServer import SimpleHTTPRequestHandler
+import StringIO
+
 COOKIE="cookie.txt"
 IMG="verify.png"
 
-from http.server import SimpleHTTPRequestHandler, HTTPServer
+#from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 class VHTTPhandler(SimpleHTTPRequestHandler):
 
@@ -72,37 +80,42 @@ class QQlogin:
     def _request(self, url, data=None, cookie=False):
         logger.debug("OUT:\n%s<--%s\n" %(url, data))
         if data:
-            data = parse.urlencode(data).encode('utf-8')
-            rr = request.Request(url, data, self._headers)
+            data = urllib.urlencode(data).encode('utf-8')
+            rr = urllib2.Request(url, data, self._headers)
         else:
-            rr = request.Request(url=url, headers=self._headers)
-        with self.opener.open(rr) as fp:
-            if fp.info().get('Content-Encoding') == 'gzip':
-                f = gzip.decompress(fp.read())
-                res = f.decode('utf-8')
+            rr = urllib2.Request(url=url, headers=self._headers)
+        fp = self.opener.open(rr)
+        if fp.info().get('Content-Encoding') == 'gzip':
+            compresseddata = fp.read()
+            compressedstream = StringIO.StringIO(compresseddata)
+            gzipper = gzip.GzipFile(fileobj=compressedstream)
+            f = gzipper.read() 
+            #f = gzip.decompress(fp.read())
+            res = f.decode('utf-8')
+        else:
+            try:
+                res = fp.read().decode('utf-8')
+            except:
+                res = fp.read()
+                logger.debug("IN-raw:\n%s"%res)
+        if fp.info().get('Content-Type') == 'text/plain; charset=utf-8':
+            res = json.loads(res)
+            if res['retcode'] == 0: #success
+                res = res['result']
+            elif res['retcode'] == 103: #cookie was timeout
+                os.remove(COOKIE)
+            elif res['retcode'] == 102: #ok
+                res = None
+            elif res['retcode'] == 114: #send msg fail TODO:retry
+                res = None
+            elif res['retcode'] == 116: #update ptwebqq value
+                res = tuple([res.update({"poll_type":"ptwebqq"})])
             else:
-                try:
-                    res = fp.read().decode('utf-8')
-                except:
-                    res = fp.read()
-                    logger.debug("IN-raw:\n%s"%res)
-            if fp.info().get('Content-Type') == 'text/plain; charset=utf-8':
-                res = json.loads(res)
-                if res['retcode'] == 0: #success
-                    res = res['result']
-                elif res['retcode'] == 103: #cookie was timeout
-                    os.remove(COOKIE)
-                elif res['retcode'] == 102: #ok
-                    res = None
-                elif res['retcode'] == 114: #send msg fail TODO:retry
-                    res = None
-                elif res['retcode'] == 116: #update ptwebqq value
-                    res = tuple([res.update({"poll_type":"ptwebqq"})])
-                else:
-                    logger.error(url)
-                    res = None
-            if cookie:
-                self.cookieJar.save(ignore_discard=True, ignore_expires=True)
+                logger.error(url)
+                res = None
+        if cookie:
+            self.cookieJar.save(ignore_discard=True, ignore_expires=True)
+        fp.close()
         logger.debug("IN:\n%s"%res)
         return res
     
@@ -110,8 +123,8 @@ class QQlogin:
         self.qq = qq
         self._pw = pw
         self.appid = "2001601"
-        self.cookieJar = cookiejar.MozillaCookieJar(COOKIE)
-        self.opener = request.build_opener(request.HTTPCookieProcessor(self.cookieJar))
+        self.cookieJar = cookielib.MozillaCookieJar(COOKIE)
+        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookieJar))
         self._headers = {
             "User-Agent":"Mozilla/5.0 (X11; Linux x86_64; rv:14.0) Gecko/20100101 Firefox/14.0.1",
             "Accept-Language":"zh-cn,en;q=0.8,en-us;q=0.5,zh-hk;q=0.3",
@@ -128,7 +141,7 @@ class QQlogin:
         if verify[0] == '1':
             img = "http://captcha.qq.com/getimage?aid=%s&r=%s&uin=%s"%(self.appid, random.Random().random(), self.qq)
             with open(IMG,"wb") as f:
-                f.write(request.urlopen(img).read())
+                f.write(urllib2.urlopen(img).read())
             ViewVerify.start()
             verify[1] = input("验证码:").strip()
         return verify

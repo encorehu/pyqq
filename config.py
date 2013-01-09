@@ -1,6 +1,7 @@
-#/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from configparser import ConfigParser
+from ConfigParser import ConfigParser
 
 config = ConfigParser()
 config.read("config.ini")
