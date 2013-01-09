@@ -52,9 +52,9 @@ class Bot:
                          "User-Agent":"Mozilla/5.0 (X11; Linux x86_64; rv:14.0) Gecko/20100101 Firefox/14.0.1",
                          "Accept-Language":"zh-cn,en;q=0.8,en-us;q=0.5,zh-hk;q=0.3",
                          "Accept-Encoding":"deflate",
-                         "Referer":"http://www.simsimi.com/talk.htm"
+                         "Referer":"http://www.simsimi.com/talk.htm?lc=ch"
         }
-        url = "http://www.simsimi.com/func/req?%s" % urllib.urlencode({"msg": "hi", "lc": "zh"})
+        url = "http://www.simsimi.com/func/req?%s" % urllib.urlencode({"msg": "hi", "lc": "ch"})
         self._request(url=url, opener=self.simi_opener)
 
     def simi_bot(self, req):
