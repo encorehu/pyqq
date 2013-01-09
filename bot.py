@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Author: maplebeats
 # gtalk/mail: maplebeats@gmail.com
 
@@ -60,7 +61,10 @@ class Bot:
         """
         req could not have % ...
         """
-        url = "http://www.simsimi.com/func/req?%s" % urllib.urlencode({"msg": req, "lc": "zh"})
+        #logger.debug(repr(req))
+        #logger.debug(urllib.urlencode({"msg": req.encode('utf-8'), "lc": "zh"}))
+        url = "http://www.simsimi.com/func/req?%s" % urllib.urlencode({"msg": req.encode('utf-8'), "lc": "zh"})
+        
         res = self._request(url, opener=self.simi_opener)
         if res == "{}":
             return False
@@ -73,17 +77,55 @@ class Bot:
         hit = json.loads(res)
         return hit['hitokoto']
 
+class BotHandler:
+    def __init__(self,name,bot):
+        self.name_ =name
+        self.bot_ = bot
+    def grouphandler(self,uin,cmd):
+        self.bot_.send_group_msg(uin,cmd)
+    #def name(self):
 
+class EchoBotHandler(BotHandler):
+    def __init__(self,bot):
+        BotHandler.__init__(self,"echo",bot)
+    def grouphandler(self,uin,cmd):
+        self.bot_.send_group_msg(uin,cmd)
+        
 class Qbot(Webqq):
 
     def __init__(self, qq, ps):
         super(Qbot, self).__init__(qq, ps)
         self.bot = Bot()
+        self.handles =[]
+        b = EchoBotHandler(self)
+        self.handles.append(b)
+    
+    def findHandler(self,name):
+        debugstr = 'find:'+name+'\n'
+        print(debugstr)
+        for v in self.handles:
+            debugstr = 'Handler:'+v.name_+'\n'
+            print(debugstr)
+            if v.name_ == name:
+                return v
+        return None
 
     def grouphandler(self, data):
         content = data['content'][1]
-        re = self.bot.reply(content)
-        self.send_group_msg(data['from_uin'], re)
+        if(content[0] =='@'):
+            re = u'命令行可以使用'
+            cmdcontent=content[1:]
+            cmds = cmdcontent.split(':',2)
+            h=self.findHandler(cmds[0])
+            if(h!=None):
+                h.grouphandler(data['from_uin'],cmds[1])
+            else:
+                self.send_group_msg(data['from_uin'], u'命令不存在')
+            #re = u"命令："+cmds[0]+'内容：'+cmds[1]
+            #self.send_group_msg(data['from_uin'], re)
+        else:
+            re = self.bot.reply(content)
+            self.send_group_msg(data['from_uin'], re)
         logger.info("IN:%s\nreply group:%s"%(content, re))
 
     def userhandler(self, data):
