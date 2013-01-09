@@ -111,22 +111,37 @@ class Qbot(Webqq):
         return None
 
     def grouphandler(self, data):
-        content = data['content'][1]
-        if(content[0] =='@'):
-            re = u'命令行可以使用'
-            cmdcontent=content[1:]
-            cmds = cmdcontent.split(':',2)
-            h=self.findHandler(cmds[0])
-            if(h!=None):
-                h.grouphandler(data['from_uin'],cmds[1])
+        #logger.debug(data)
+        #content_list = data['content'][1]
+        content_list = data['content'] # a list contains cface text
+        content = ''
+        for piece in content_list:
+            if type(piece) == list:
+                continue
             else:
-                self.send_group_msg(data['from_uin'], u'命令不存在')
-            #re = u"命令："+cmds[0]+'内容：'+cmds[1]
-            #self.send_group_msg(data['from_uin'], re)
+                content += piece
+        content = content.strip()
+        if len(content)==0: # cface without text
+            pass
         else:
-            re = self.bot.reply(content)
-            self.send_group_msg(data['from_uin'], re)
-        logger.info("IN:%s\nreply group:%s"%(content, re))
+            #logger.debug(content)
+            if(content[0] =='@'):
+                
+            if(content[0] =='@'):
+                re = u'命令行可以使用'
+                cmdcontent=content[1:]
+                cmds = cmdcontent.split(':',2)
+                h=self.findHandler(cmds[0])
+                if(h!=None):
+                    h.grouphandler(data['from_uin'],cmds[1])
+                else:
+                    self.send_group_msg(data['from_uin'], u'你能说人话么, 我怎么听不懂')
+                #re = u"命令："+cmds[0]+'内容：'+cmds[1]
+                #self.send_group_msg(data['from_uin'], re)
+            else:
+                re = self.bot.reply(content)
+                self.send_group_msg(data['from_uin'], re)
+            logger.info("IN:%s\nreply group:%s"%(content, re))
 
     def userhandler(self, data):
         content = data['content'][1]
