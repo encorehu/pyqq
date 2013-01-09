@@ -126,8 +126,6 @@ class Qbot(Webqq):
         else:
             #logger.debug(content)
             if(content[0] =='@'):
-                
-            if(content[0] =='@'):
                 re = u'命令行可以使用'
                 cmdcontent=content[1:]
                 cmds = cmdcontent.split(':',2)
