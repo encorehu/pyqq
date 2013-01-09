@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Author: maplebeats
 # gtalk/mail: maplebeats@gmail.com
 
