@@ -22,11 +22,12 @@ class Bot:
             rr = urllib2.Request(url, data, self._headers)
         else:
             rr = urllib2.Request(url=url, headers=self._headers)
-        with opener.open(rr) as fp:
-            try:
-                res = fp.read().decode('utf-8')
-            except:
-                res = fp.read()
+        #with opener.open(rr) as fp:
+        fp = opener.open(rr)
+        try:
+            res = fp.read().decode('utf-8')
+        except:
+            res = fp.read()
         return res
 
     def __init__(self):
