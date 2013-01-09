@@ -56,7 +56,7 @@ class ViewVerify():
     def stop(cls):
         cls.httpd.server_close()
 
-class QQlogin:
+class QQlogin(object):
 
     def _hexchar2bin(self, num):
         arry = bytearray()
@@ -67,7 +67,7 @@ class QQlogin:
     def _preprocess(self, password=None, verifycode=None):
         self.__hashpasswd = self.md5(password) #store hashed password
         I = self._hexchar2bin(self.__hashpasswd)
-        H = self.md5(I + bytes(verifycode[2], encoding="ISO-8859-1"))
+        H = self.md5(I + bytearray(verifycode[2]))
         G = self.md5(H + verifycode[1].upper())
         return G
 
@@ -156,10 +156,10 @@ class QQlogin:
         url = "http://ptlogin2.qq.com/login?u=%s&p=%s&verifycode=%s&aid=%s"%(self.qq,self.pswd,self._verifycode[1],self.appid)\
         + "&u1=http%3A%2F%2Fweb.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=3-25-30079&mibao_css=m_webqq&t=1&g=1"
         res = self._request(url=url)
-        if res.find("登陆成功") != -1:
-            logger.log("登陆成功")
-        elif res.find("验证码不正确") != -1:
-            logger.error("验证码错误")
+        if res.find(u"登录成功") != -1:
+            logger.info(u"登录成功")
+        elif res.find(u"验证码不正确") != -1:
+            logger.error(u"验证码错误")
             self._getverifycode()
             self.test()
         else:
