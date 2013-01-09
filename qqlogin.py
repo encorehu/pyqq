@@ -14,7 +14,7 @@ from logger import logger
 import urllib
 import urllib2
 import cookielib
-import SimpleHTTPServer
+import SimpleHTTPServer,BaseHTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 import StringIO
 
@@ -45,7 +45,7 @@ class ViewVerify():
 
     @classmethod
     def start(cls):
-        cls.httpd = HTTPServer(('',8000), VHTTPhandler)
+        cls.httpd = BaseHTTPServer.HTTPServer(('0.0.0.0',8100), VHTTPhandler)
         print("please open http://localhost:8000/%s"%(IMG)) #TODO
         try:
             cls.httpd.serve_forever()
@@ -142,7 +142,7 @@ class QQlogin(object):
             img = "http://captcha.qq.com/getimage?aid=%s&r=%s&uin=%s"%(self.appid, random.Random().random(), self.qq)
             with open(IMG,"wb") as f:
                 f.write(urllib2.urlopen(img).read())
-            ViewVerify.start()
+            #ViewVerify.start()
             verify[1] = input("验证码:").strip()
         return verify
 
