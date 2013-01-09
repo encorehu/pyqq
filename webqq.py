@@ -141,7 +141,10 @@ class Webqq(QQlogin):
         return self.msgid
 
     def send_user_msg(self, uin=None, msg="send user msg"):
-        rmsg = '["'+msg+'",["font",{"name":"宋体","size":"13","style":[0,0,0],"color":"000000"}]]'
+        #rmsg = '["'+msg+'",["font",{"name":"宋体","size":"13","style":[0,0,0],"color":"000000"}]]'
+        if type(msg) == unicode:
+            msg = msg.encode('utf-8')
+        rmsg = '["'+msg+'",["font",{"name":'+'"\xe5\xae\x8b\xe4\xbd\x93"'+',"size":"13","style":[0,0,0],"color":"000000"}]]'
         url = "http://d.web2.qq.com/channel/send_buddy_msg2"
         status = {'to':uin,
             'face':180,
@@ -158,7 +161,12 @@ class Webqq(QQlogin):
         return res
 
     def send_group_msg(self, uin=None, msg="send group msg"):
-        rmsg = '["'+msg+'",["font",{"name":"宋体","size":"13","style":[0,0,0],"color":"000000"}]]'
+        #logger.debug(repr(msg)) msg is unicode
+        #UnicodeDecodeError: 'ascii' codec can't decode byte 0xe5 in position 1: ordinal not in range(128)
+        if type(msg) == unicode:
+            msg = msg.encode('utf-8')
+        rmsg = '["'+msg+'",["font",{"name":'+'"\xe5\xae\x8b\xe4\xbd\x93"'+',"size":"13","style":[0,0,0],"color":"000000"}]]'
+        #logger.debug(rmsg)
         url = "http://d.web2.qq.com/channel/send_qun_msg2"
         status = {"group_uin":uin,
             "content":rmsg,
