@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Author: maplebeats
 # gtalk/mail: maplebeats@gmail.com
 
@@ -30,15 +31,15 @@ class Webqq(QQlogin):
             url = "http://ptlogin2.qq.com/login?u=%s&p=%s&verifycode=%s&aid=%s"%(self.qq,self.pswd,self._verifycode[1],self.appid)\
             + "&u1=http%3A%2F%2Fweb.qq.com%2Floginproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&h=1&ptredirect=0&ptlang=2052&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=3-25-30079&mibao_css=m_webqq&t=1&g=1"
             res = self._request(url=url, cookie=True)
-            if res.find("成功") != -1:
+            if res.find(u"成功") != -1:
                 pass
-            elif res.find("验证码") != -1:
-                print("验证码错误")
+            elif res.find(u"验证码") != -1:
+                print(u"验证码错误")
                 self._getverifycode()
                 self.login()
             else:
                 logger.error(res)
-                raise Exception("登陆错误")
+                raise Exception(u"登陆错误")
         self.cookies.update(dict([(x.name,x.value) for x in self.cookieJar]))
         tmp = self.get_login_info()
         if os.path.isfile(COOKIE): #cookie timeout
@@ -125,7 +126,7 @@ class Webqq(QQlogin):
                     pass #TODO
                 elif pt == 'kick_message':
                     os.remove(COOKIE)
-                    raise Exception("被下线")
+                    raise Exception(u"被下线")
                 else:
                     pass
 
